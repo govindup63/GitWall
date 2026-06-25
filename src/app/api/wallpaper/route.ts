@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchContributions } from "@/github";
+import { fetchContributions, GitHubError } from "@/github";
 import { renderWallpaper } from "@/render";
 import { getCached, setCache } from "@/lib/cache";
 
@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const theme = searchParams.get("theme") || "classic";
   const statsParam = searchParams.get("stats");
   const device = searchParams.get("device") || "iphone14";
+  const shape = searchParams.get("shape") === "circle" ? "circle" : "box";
 
   if (!user) {
     return NextResponse.json(
@@ -18,13 +19,13 @@ export async function GET(request: NextRequest) {
   }
 
   const stats = statsParam !== "false";
-  const cacheKey = `${user}:${theme}:${stats}:${device}`;
+  const cacheKey = `${user}:${theme}:${stats}:${device}:${shape}`;
 
   try {
     let png = getCached(cacheKey);
     if (!png) {
       const calendar = await fetchContributions(user);
-      png = renderWallpaper(calendar, { theme, device, stats, user });
+      png = renderWallpaper(calendar, { theme, device, stats, user, shape });
       setCache(cacheKey, png);
     }
 
@@ -36,8 +37,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err: unknown) {
+    const status = err instanceof GitHubError ? err.status : 500;
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error(`Error generating wallpaper for ${user}:`, message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status });
   }
 }

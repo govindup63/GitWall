@@ -1,6 +1,5 @@
 import type { MinecraftVariant } from "./lib/minecraft";
 
-
 export interface Theme {
   name: string;
   background: string;

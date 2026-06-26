@@ -17,6 +17,8 @@ export interface RenderOptions {
   stats?: boolean;
   user?: string;
   shape?: CellShape;
+  customWidth?: number;
+  customHeight?: number;
 }
 
 export function renderWallpaper(
@@ -29,11 +31,20 @@ export function renderWallpaper(
     stats = true,
     user = "",
     shape = "box",
+    customWidth,
+    customHeight,
   } = options;
 
   const theme = getTheme(themeName);
-  const device = getDevice(deviceName);
-  const { width, height } = device;
+  let width, height;
+  if (customWidth && customHeight) {
+    width = customWidth;
+    height = customHeight;
+  } else {
+    const device = getDevice(deviceName);
+    width = device.width;
+    height = device.height;
+  }
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");

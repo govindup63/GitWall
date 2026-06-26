@@ -336,6 +336,16 @@ export default function Home() {
   const hasGenerated = generatedKey !== null;
   const isDirty = hasGenerated && currentKey !== generatedKey;
 
+  // Auto-regenerate when theme changes if user has already generated once
+  const generateRef = useRef(generate);
+  useEffect(() => { generateRef.current = generate; }, [generate]);
+  const prevThemeRef = useRef(selectedTheme);
+  useEffect(() => {
+    if (prevThemeRef.current === selectedTheme) return;
+    prevThemeRef.current = selectedTheme;
+    if (username.trim() && hasGenerated) generateRef.current();
+  }, [selectedTheme, username, hasGenerated]);
+
   // The Minecraft styles are grouped under one picker tile that reveals its four
   // block variants; everything else stays in the flat theme grid.
   const gridThemes = themes.filter((t) => !isMinecraftId(t.id));
@@ -754,6 +764,47 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Mobile-only phone preview — shown below Generate, hidden on desktop */}
+            <div className="flex justify-center lg:hidden">
+              {platform === "iphone" ? (
+                <div className="w-[200px] h-[432px] border border-white/[0.1] bg-[#0d1117] relative overflow-hidden rounded-[2.2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[60px] h-[17px] bg-black rounded-full z-10" />
+                  {loading && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="size-5 animate-spin text-white/20" /></div>}
+                  {!loading && !previewSrc && (
+                    <div className="flex flex-col items-center justify-center h-full gap-3 px-8">
+                      <Smartphone className="size-7 text-white/10" />
+                      <p className="text-[11px] font-medium text-white/20 text-center leading-relaxed">Enter your username and generate</p>
+                    </div>
+                  )}
+                  {previewSrc && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previewSrc} alt="Wallpaper preview" className={`w-full h-full object-cover transition-opacity ${isDirty ? "opacity-40" : ""}`} />
+                  )}
+                  {previewSrc && isDirty && !loading && (
+                    <div className="absolute inset-x-0 bottom-0 bg-black/70 py-2 text-center text-[10px] font-medium text-white/70">Preview out of date</div>
+                  )}
+                </div>
+              ) : (
+                <div className="w-[200px] h-[432px] border border-[#3ddc84]/[0.15] bg-[#0a0d0b] relative overflow-hidden rounded-[1.8rem] shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+                  <div className="absolute top-3.5 left-1/2 -translate-x-1/2 w-[13px] h-[13px] bg-black rounded-full z-10 ring-1 ring-white/[0.08]" />
+                  {loading && <div className="absolute inset-0 flex items-center justify-center"><Loader2 className="size-5 animate-spin text-[#3ddc84]/30" /></div>}
+                  {!loading && !previewSrc && (
+                    <div className="flex flex-col items-center justify-center h-full gap-3 px-8">
+                      <Smartphone className="size-7 text-white/10" />
+                      <p className="text-[11px] font-medium text-white/20 text-center leading-relaxed">{androidDevice ? `${androidDevice.name} selected` : "Search your Android model"}</p>
+                    </div>
+                  )}
+                  {previewSrc && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previewSrc} alt="Wallpaper preview" className={`w-full h-full object-cover transition-opacity ${isDirty ? "opacity-40" : ""}`} />
+                  )}
+                  {previewSrc && isDirty && !loading && (
+                    <div className="absolute inset-x-0 bottom-0 bg-black/70 py-2 text-center text-[10px] font-medium text-white/70">Preview out of date</div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Export & Automate */}
             <div className="pt-8 border-t border-white/[0.06]">
               <p className="text-[11px] font-semibold text-white/35 uppercase tracking-widest mb-5">
@@ -780,8 +831,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* RIGHT: Phone Preview */}
-          <div className="flex justify-center lg:sticky lg:top-8 lg:self-start">
+          {/* RIGHT: Phone Preview — desktop only */}
+          <div className="hidden lg:flex justify-center lg:sticky lg:top-8 lg:self-start">
             {platform === "iphone" ? (
               /* iPhone frame */
               <div className="w-[240px] h-[520px] border border-white/[0.1] bg-[#0d1117] relative overflow-hidden rounded-[2.2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)]">

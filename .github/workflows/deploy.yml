@@ -21,12 +21,13 @@ jobs:
             docker build -t gitwall .
             docker stop gitwall || true
             docker rm gitwall || true
-            docker run -d -p 3000:3000 --name gitwall --restart unless-stopped gitwall
-            
+            docker run -d -p 3000:3000 --name gitwall --restart unless-stopped -e GITHUB_TOKEN=$GITHUB_TOKEN gitwall
+
             # Wait for container to start
             echo "Waiting for Next.js server to start..."
             sleep 10
-            
+
+
             # Health check
             if ! curl -f http://localhost:3000/api/health; then
               echo "Health check failed!"

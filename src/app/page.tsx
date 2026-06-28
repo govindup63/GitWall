@@ -14,11 +14,13 @@ const MINECRAFT_DEFAULT = "minecraft-slime";
 const ONEPIECE_DEFAULT = "onepiece-jollyroger";
 const AOT_DEFAULT = "aot-wingsoffreedom";
 const GOT_DEFAULT = "got-targaryen";
+const POINTBLANK_ID = "pointblank";
 const POKEMON_DEFAULT = "pokemon-pikachu";
 const isMinecraftId = (id: string) => id.startsWith("minecraft-");
 const isOnePieceId = (id: string) => id.startsWith("onepiece-");
 const isAotId = (id: string) => id.startsWith("aot-");
 const isGotId = (id: string) => id.startsWith("got-");
+const isPointBlankId = (id: string) => id === POINTBLANK_ID;
 const isPokemonId = (id: string) => id.startsWith("pokemon-");
 
 type Theme = { id: string; name: string; colors: string[]; background: string };
@@ -362,7 +364,7 @@ export default function Home() {
   // single picker tiles that expand to show their variants; everything else stays
   // in the flat theme grid.
   const gridThemes = themes.filter(
-    (t) => !isMinecraftId(t.id) && !isOnePieceId(t.id) && !isAotId(t.id) && !isGotId(t.id) && !isPokemonId(t.id)
+    (t) => !isMinecraftId(t.id) && !isOnePieceId(t.id) && !isAotId(t.id) && !isGotId(t.id) && !isPointBlankId(t.id) && !isPokemonId(t.id)
   );
   const minecraftThemes = themes.filter((t) => isMinecraftId(t.id));
   const onepieceThemes = themes.filter((t) => isOnePieceId(t.id));
@@ -372,10 +374,12 @@ export default function Home() {
   const onepieceSelected = isOnePieceId(selectedTheme);
   const aotSelected = isAotId(selectedTheme);
   const gotSelected = isGotId(selectedTheme);
+  const pointblankSelected = isPointBlankId(selectedTheme);
   const aotGroup = aotThemes.find((t) => t.id === AOT_DEFAULT) ?? aotThemes[0];
   const minecraftGroup = minecraftThemes.find((t) => t.id === MINECRAFT_DEFAULT) ?? minecraftThemes[0];
   const onepieceGroup = onepieceThemes.find((t) => t.id === ONEPIECE_DEFAULT) ?? onepieceThemes[0];
   const gotGroup = gotThemes.find((t) => t.id === GOT_DEFAULT) ?? gotThemes[0];
+  const pointblankTheme = themes.find((t) => isPointBlankId(t.id));
   const pokemonThemes = themes.filter((t) => isPokemonId(t.id));
   const pokemonSelected = isPokemonId(selectedTheme);
   const pokemonGroup = pokemonThemes.find((t) => t.id === POKEMON_DEFAULT) ?? pokemonThemes[0];
@@ -677,7 +681,7 @@ export default function Home() {
 
                 {/* Shape lives with General — it only changes how these solid cells
                     are drawn (box vs circle); pixel-art/full-scene themes ignore it. */}
-                {!minecraftSelected && !onepieceSelected && !aotSelected && !gotSelected && !pokemonSelected && (
+                {!minecraftSelected && !onepieceSelected && !aotSelected && !gotSelected && !pointblankSelected && !pokemonSelected && (
                   <div className="mt-3 flex items-center gap-2.5">
                     <span className="text-[11px] font-medium text-white/30">Shape</span>
                     <div className="inline-flex gap-1 p-1 bg-white/[0.04] border border-white/[0.08] rounded-lg">
@@ -801,6 +805,30 @@ export default function Home() {
                       </div>
                       <span className="text-[10px] font-semibold uppercase tracking-wider block text-center text-white/60">
                         Game of Thrones
+                      </span>
+                    </button>
+                  )}
+
+                  {/* Point Blank — a single full-scene theme (no variants) */}
+                  {pointblankTheme && (
+                    <button
+                      onClick={() => setSelectedTheme(POINTBLANK_ID)}
+                      aria-pressed={pointblankSelected}
+                      aria-label="Point Blank theme"
+                      className={`px-3.5 py-2.5 rounded-lg border transition-all cursor-pointer ${
+                        pointblankSelected
+                          ? "border-white/50 ring-1 ring-white/10"
+                          : "border-white/[0.07] hover:border-white/20"
+                      }`}
+                      style={{ background: pointblankTheme.background }}
+                    >
+                      <div className="flex gap-1 justify-center mb-1.5">
+                        {pointblankTheme.colors.map((c, i) => (
+                          <span key={i} className="w-2 h-2 rounded-full" style={{ background: c }} />
+                        ))}
+                      </div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider block text-center text-white/60">
+                        Point Blank
                       </span>
                     </button>
                   )}
